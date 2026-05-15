@@ -18,7 +18,8 @@ import {
   Phone, 
   ChevronRight,
   ShieldCheck,
-  Zap
+  Zap,
+  MapPin
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -28,15 +29,6 @@ interface Review {
   location: string;
   text: string;
   rating: number;
-}
-
-interface PriceOption {
-  id: string;
-  title: string;
-  price: number;
-  originalPrice: number;
-  description: string;
-  recommended?: boolean;
 }
 
 const REVIEWS: Review[] = [
@@ -66,31 +58,12 @@ const REVIEWS: Review[] = [
   }
 ];
 
-const PRICE_OPTIONS: PriceOption[] = [
-  {
-    id: 'basic',
-    title: "Soulmate Sketch",
-    price: 199,
-    originalPrice: 499,
-    description: "Digital hand-drawn portrait of your soulmate."
-  },
-  {
-    id: 'personality',
-    title: "Detailed Name & Personality Report",
-    price: 199,
-    originalPrice: 399,
-    description: "Learn their traits, habits, and mindset.",
-    recommended: true
-  },
-  {
-    id: 'timeline',
-    title: "Love Timeline (12 Months)",
-    price: 199,
-    originalPrice: 499,
-    description: "When and where you will meet them."
-  }
+const SAMPLE_IMAGES = [
+  '/samples/1.jpg',
+  '/samples/2.jpg',
+  '/samples/3.jpg',
+  '/samples/4.jpg'
 ];
-
 export default function Home() {
   const navigate = useNavigate();
   const [timeLeft, setTimeLeft] = useState(7993); // Approx 2h 13m
@@ -99,16 +72,28 @@ export default function Home() {
     email: '',
     phone: '',
     dob: '',
-    gender: 'female'
+    gender: 'female',
+    tob: '',
+    pobCity: '',
+    pobState: ''
   });
-  const [selectedAddons, setSelectedAddons] = useState<string[]>(['personality']);
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
     }, 1000);
-    return () => clearInterval(timer);
+    
+    const imageTimer = setInterval(() => {
+      setCurrentImageIndex(prev => (prev + 1) % SAMPLE_IMAGES.length);
+    }, 4000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(imageTimer);
+    };
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -118,13 +103,7 @@ export default function Home() {
     return `${h}h ${m}m ${s}s`;
   };
 
-  const totalPrice = 199 + selectedAddons.length * 199 - (selectedAddons.length >= 2 ? 100 : 0);
 
-  const toggleAddon = (id: string) => {
-    setSelectedAddons(prev => 
-      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
-    );
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,9 +111,7 @@ export default function Home() {
     
     try {
       const payload = {
-        ...formData,
-        addons: selectedAddons,
-        totalPrice
+        ...formData
       };
 
       const response = await fetch('/api/orders', {
@@ -232,7 +209,7 @@ export default function Home() {
               <div className="flex -space-x-3 items-center ml-2">
                 {[1, 2, 3, 4].map(i => (
                   <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0F0718] bg-gray-600 overflow-hidden">
-                    <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="User" />
+                    <img src={`/reviews/${i}.jpg`} alt="Reviewer" className="w-full h-full object-cover" />
                   </div>
                 ))}
                 <div className="ml-6 text-sm text-gray-400 font-medium">
@@ -251,7 +228,17 @@ export default function Home() {
           >
             <div className="absolute inset-0 bg-gradient-to-b from-orange-500/20 to-transparent rounded-3xl rotate-3 blur-2xl" />
             <div className="relative w-full max-w-md aspect-[3/4] bg-neutral-900/40 rounded-3xl border border-white/10 p-4 backdrop-blur-sm shadow-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop')] bg-cover bg-center opacity-30 group-hover:scale-110 transition-transform duration-1000" />
+              <AnimatePresence>
+                <motion.div 
+                  key={currentImageIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.5 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 2.5 }}
+                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-1000"
+                  style={{ backgroundImage: `url(${SAMPLE_IMAGES[currentImageIndex]})` }}
+                />
+              </AnimatePresence>
               <div className="relative h-full border border-white/5 rounded-2xl flex flex-col items-center justify-end p-8 bg-gradient-to-t from-black via-black/40 to-transparent">
                 <div className="text-center">
                   <div className="text-xs font-bold text-orange-400 uppercase tracking-widest mb-2">Sample Result</div>
@@ -326,13 +313,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Order Form & Pricing */}
+      {/* Order Form */}
       <section id="order-form" className="py-24 px-6 bg-gradient-to-b from-[#0F0718] to-[#1A0B2E]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="max-w-3xl mx-auto">
           
           {/* Form */}
-          <div className="p-8 glass-card rounded-3xl self-start">
-            <h2 className="text-3xl font-bold mb-8">Get Your Divine Sketch</h2>
+          <div className="p-8 glass-card rounded-3xl">
+            <h2 className="text-3xl font-bold mb-8 text-center">Get Your Divine Sketch</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">FULL NAME *</label>
@@ -407,6 +394,51 @@ export default function Home() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">TIME OF BIRTH *</label>
+                <div className="relative">
+                  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input 
+                    required
+                    type="time"
+                    className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
+                    value={formData.tob}
+                    onChange={e => setFormData({...formData, tob: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">PLACE OF BIRTH (CITY) *</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="City or Town"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
+                      value={formData.pobCity}
+                      onChange={e => setFormData({...formData, pobCity: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">STATE *</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="State"
+                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
+                      value={formData.pobState}
+                      onChange={e => setFormData({...formData, pobState: e.target.value})}
+                    />
+                  </div>
+                </div>
+              </div>
+
               <button 
                 type="submit"
                 disabled={isSubmitting}
@@ -422,85 +454,6 @@ export default function Home() {
                 )}
               </button>
             </form>
-          </div>
-
-          {/* Pricing & Addons */}
-          <div className="space-y-8">
-            <div className="p-8 glass-card rounded-3xl">
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                Order Summary
-                <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-md">Save ₹300+</span>
-              </h3>
-              
-              <div className="space-y-4 mb-8">
-                <div className="flex justify-between items-center p-4 bg-orange-500/5 border border-orange-500/10 rounded-xl">
-                  <div>
-                    <div className="font-bold">Soulmate Sketch</div>
-                    <div className="text-xs text-orange-400 font-bold">Limited Offer Applied</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm line-through text-gray-500">₹499</div>
-                    <div className="font-bold text-lg">₹199</div>
-                  </div>
-                </div>
-
-                {PRICE_OPTIONS.slice(1).map(option => (
-                  <label 
-                    key={option.id}
-                    className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
-                      selectedAddons.includes(option.id) 
-                        ? 'bg-purple-500/10 border-purple-500/50' 
-                        : 'bg-white/5 border-white/5 hover:border-white/20'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <input 
-                        type="checkbox" 
-                        className="w-5 h-5 accent-purple-500"
-                        checked={selectedAddons.includes(option.id)}
-                        onChange={() => toggleAddon(option.id)}
-                      />
-                      <div>
-                        <div className="font-bold flex items-center gap-2">
-                          {option.title}
-                          {option.recommended && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-purple-500 text-white rounded uppercase font-black">Best</span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-400">{option.description}</div>
-                      </div>
-                    </div>
-                    <div className="font-bold text-purple-400">+₹199</div>
-                  </label>
-                ))}
-              </div>
-
-              {selectedAddons.length >= 2 && (
-                <div className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between text-green-400 text-sm font-bold">
-                  <span>Special Combo Discount:</span>
-                  <span>- ₹100</span>
-                </div>
-              )}
-
-              <div className="pt-6 border-t border-white/10">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-gray-400 uppercase tracking-widest text-xs font-bold">Total Amount</span>
-                  <span className="text-3xl font-black">₹{totalPrice}</span>
-                </div>
-                <div className="text-xs text-center text-gray-500 mt-4 flex justify-center items-center gap-2">
-                  <ShieldCheck className="w-4 h-4" />
-                  Secure SSL Encrypted Checkout
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-orange-500/10 p-6 rounded-3xl border border-orange-500/20 flex gap-4">
-              <Clock className="w-10 h-10 text-orange-500 shrink-0" />
-              <div>
-                <h4 className="font-bold text-orange-400 mb-1">Express Delivery Available</h4>
-                <p className="text-sm text-gray-400">Due to high demand, our current delivery time is estimated at 4 working hours. Your sketch will be sent directly to your email.</p>
-              </div>
-            </div>
           </div>
         </div>
       </section>
