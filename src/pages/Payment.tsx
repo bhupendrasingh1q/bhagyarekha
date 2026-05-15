@@ -75,26 +75,110 @@ export default function Payment() {
 
   const totalPrice = 99 + selectedAddons.length * 149 - (selectedAddons.length >= 2 ? 100 : 0);
 
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePayment = async () => {
     setProcessing(true);
     try {
-      const response = await fetch(`/api/orders/${orderId}/pay`, {
+      const res = await loadRazorpayScript();
+      if (!res) {
+        alert("Razorpay SDK failed to load. Are you online?");
+        setProcessing(false);
+        return;
+      }
+
+      // 1. Create order on backend
+      const orderResponse = await fetch(`/api/orders/${orderId}/create-razorpay-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          paymentMethod,
-          addons: selectedAddons,
-          totalPrice 
-        })
+        body: JSON.stringify({ totalPrice })
       });
-      const data = await response.json();
+      const orderData = await orderResponse.json();
       
-      if (data.success) {
-        alert('Payment successful! Your order is now confirmed.');
-        navigate('/'); // Or redirect to a dedicated Success page
-      } else {
-        alert(data.message || 'Payment failed.');
+      if (!orderData.success) {
+        alert("Failed to create order: " + orderData.message);
+        setProcessing(false);
+        return;
       }
+
+      // 2. Initialize Razorpay Checkout
+      const options = {
+        key: "rzp_test_SpZZIIFGs5Ldkp", // User's Test Key ID
+        amount: totalPrice * 100, // Amount in paise
+        currency: "INR",
+        name: "AstroJyoti",
+        description: "Soulmate Sketch & Reading",
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          try {
+            // 3. Verify payment on backend
+            const verifyResponse = await fetch(`/api/orders/${orderId}/verify-payment`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                paymentMethod,
+                addons: selectedAddons,
+                totalPrice
+              })
+            });
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              alert('Payment successful! Your order is now confirmed.');
+              navigate('/'); // Or navigate to a success page
+            } else {
+              alert(verifyData.message || 'Payment verification failed.');
+            }
+          } catch (err) {
+            console.error('Verification error', err);
+            alert('An error occurred during payment verification.');
+          }
+        },
+        prefill: {
+          name: order.name || '',
+          email: order.email || '',
+          contact: order.phone || ''
+        },
+        theme: {
+          color: "#F97316"
+        },
+        config: {
+          display: {
+            blocks: {
+              upi_card_wallet: {
+                name: 'Pay using UPI, Card, or Wallet',
+                instruments: [
+                  { method: 'upi' },
+                  { method: 'card' },
+                  { method: 'wallet' }
+                ]
+              }
+            },
+            sequence: ['block.upi_card_wallet'],
+            preferences: {
+              show_default_blocks: false
+            }
+          }
+        }
+      };
+
+      const paymentObject = new (window as any).Razorpay(options);
+      paymentObject.on('payment.failed', function (response: any) {
+        alert("Payment failed: " + response.error.description);
+      });
+      paymentObject.open();
+
     } catch (err) {
       console.error('Payment error', err);
       alert('An error occurred during payment.');
@@ -238,10 +322,10 @@ export default function Payment() {
             )}
           </button>
           
-          <div className="text-center mt-6 text-xs text-gray-500 flex items-center justify-center gap-2">
-            <ShieldCheck className="w-4 h-4" />
-            256-bit Secure SSL Processing (Demo Mode)
-          </div>
+            <div className="text-center mt-6 text-xs text-gray-500 flex items-center justify-center gap-2">
+              <ShieldCheck className="w-4 h-4" />
+              100% Secure Payments via Razorpay
+            </div>
         </div>
       </div>
     </div>

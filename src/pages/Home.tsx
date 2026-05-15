@@ -502,7 +502,7 @@ export default function Home() {
           <div className="flex gap-8 text-sm text-gray-500">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
             <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-white transition-colors">Contact Us</a>
+            <a href="mailto:Astrojyoti9599@gmail.com" className="hover:text-white transition-colors">Contact Us</a>
           </div>
           <div className="text-gray-500 text-sm">
             © 2026 AstroJyoti. Spiritual & Creative Services.

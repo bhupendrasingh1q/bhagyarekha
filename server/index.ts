@@ -3,6 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -23,6 +26,21 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Security Middleware
 app.use(helmet()); 
 app.use(cors()); 
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || '',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || ''
+}); 
+
+// Initialize Nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // Body parsing with size limits to prevent payload attacks
 app.use(express.json({ limit: '10kb' })); 
@@ -117,15 +135,60 @@ app.get('/api/orders/:id', async (req, res) => {
   }
 });
 
-app.post('/api/orders/:id/pay', async (req, res) => {
+app.post('/api/orders/:id/create-razorpay-order', async (req, res) => {
   try {
     const { id } = req.params;
-    const { paymentMethod, addons, totalPrice } = req.body;
+    const { totalPrice } = req.body;
+
+    if (!totalPrice) {
+      return res.status(400).json({ success: false, message: 'Total price is required' });
+    }
+
+    const options = {
+      amount: totalPrice * 100, // paise
+      currency: "INR",
+      receipt: id,
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json({ success: true, orderId: order.id });
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/orders/:id/verify-payment', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      razorpay_order_id, 
+      razorpay_payment_id, 
+      razorpay_signature,
+      paymentMethod,
+      addons,
+      totalPrice
+    } = req.body;
     
+    // Check if this is a mock payment or actual razorpay payment
+    // If it's razorpay, verify signature
+    if (razorpay_order_id && razorpay_payment_id && razorpay_signature) {
+      const text = razorpay_order_id + "|" + razorpay_payment_id;
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || '')
+        .update(text.toString())
+        .digest("hex");
+
+      if (expectedSignature !== razorpay_signature) {
+        return res.status(400).json({ success: false, message: 'Invalid payment signature' });
+      }
+    }
+
     // Update in Supabase
     const updateData: any = {
       status: 'paid',
-      paymentMethod: paymentMethod || 'unknown',
+      paymentMethod: paymentMethod || 'razorpay',
       paidAt: new Date().toISOString()
     };
     
@@ -142,6 +205,64 @@ app.post('/api/orders/:id/pay', async (req, res) => {
     if (error || !data) {
       console.error('Supabase Update Error:', error);
       return res.status(404).json({ success: false, message: 'Order not found or update failed' });
+    }
+
+    // Send Success Email
+    try {
+      const selectedServices = ['Soulmate Sketch'];
+      if (data.addons && data.addons.includes('personality')) selectedServices.push('Detailed Name & Personality Report');
+      if (data.addons && data.addons.includes('timeline')) selectedServices.push('Love Timeline (12 Months)');
+
+      const servicesHtml = selectedServices.map(s => `<li>${s}</li>`).join('');
+
+      const mailOptions = {
+        from: `"AstroJyoti" <${process.env.EMAIL_USER}>`,
+        to: data.email,
+        subject: 'Payment Successful - AstroJyoti Order Confirmation',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h2 style="color: #F97316; margin-bottom: 5px;">Order Confirmed!</h2>
+              <p style="color: #666; margin-top: 0;">Thank you for choosing AstroJyoti.</p>
+            </div>
+            
+            <p>Dear <strong>${data.name}</strong>,</p>
+            <p>We have successfully received your payment of <strong>₹${data.totalPrice}</strong>.</p>
+            
+            <div style="background-color: #fffaf0; padding: 20px; border-radius: 8px; border: 1px solid #ffedd5; margin: 25px 0;">
+              <h3 style="margin-top: 0; color: #F97316; border-bottom: 1px solid #ffedd5; padding-bottom: 10px;">Services Requested</h3>
+              <ul style="margin-bottom: 0;">
+                ${servicesHtml}
+              </ul>
+            </div>
+
+            <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin: 25px 0;">
+              <h3 style="margin-top: 0; color: #555; border-bottom: 1px solid #eee; padding-bottom: 10px;">Your Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr><td style="padding: 5px 0; color: #666;"><strong>Date of Birth:</strong></td><td style="padding: 5px 0;">${data.dob || 'Not provided'}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;"><strong>Time of Birth:</strong></td><td style="padding: 5px 0;">${data.tob || 'Not provided'}</td></tr>
+                <tr><td style="padding: 5px 0; color: #666;"><strong>Place of Birth:</strong></td><td style="padding: 5px 0;">${data.pobCity || ''}, ${data.pobState || ''}</td></tr>
+              </table>
+            </div>
+
+            <p style="background-color: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #22c55e;">
+              Our intuitive artists and readers will begin meditating on your birth energy immediately. You will receive your completed sketch and reading via email within the next <strong>4 working hours</strong>.
+            </p>
+            
+            <p style="margin-top: 30px;">If you have any questions, feedback, or require assistance, please reply directly to this email at <a href="mailto:${process.env.EMAIL_USER}" style="color: #F97316; text-decoration: none;">${process.env.EMAIL_USER}</a>.</p>
+
+            <p style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; color: #666;">
+              Warm regards,<br/>
+              <strong>The AstroJyoti Team</strong>
+            </p>
+          </div>
+        `
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Success email sent to ${data.email}`);
+    } catch (emailError) {
+      console.error('Error sending success email:', emailError);
     }
 
     res.json({ success: true, message: 'Payment successful', order: data });
