@@ -42,7 +42,6 @@ export default function Payment() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('upi');
   
   // Addon state moved here
   const [selectedAddons, setSelectedAddons] = useState<string[]>(['personality']);
@@ -111,10 +110,10 @@ export default function Payment() {
 
       // 2. Initialize Razorpay Checkout
       const options = {
-        key: "rzp_test_SpZZIIFGs5Ldkp", // User's Test Key ID
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: totalPrice * 100, // Amount in paise
         currency: "INR",
-        name: "AstroJyoti",
+        name: "BhagyaRekha",
         description: "Soulmate Sketch & Reading",
         order_id: orderData.orderId,
         handler: async function (response: any) {
@@ -127,7 +126,7 @@ export default function Payment() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
-                paymentMethod,
+                paymentMethod: 'razorpay',
                 addons: selectedAddons,
                 totalPrice
               })
@@ -152,24 +151,6 @@ export default function Payment() {
         },
         theme: {
           color: "#F97316"
-        },
-        config: {
-          display: {
-            blocks: {
-              upi_card_wallet: {
-                name: 'Pay using UPI, Card, or Wallet',
-                instruments: [
-                  { method: 'upi' },
-                  { method: 'card' },
-                  { method: 'wallet' }
-                ]
-              }
-            },
-            sequence: ['block.upi_card_wallet'],
-            preferences: {
-              show_default_blocks: false
-            }
-          }
         }
       };
 
@@ -277,34 +258,20 @@ export default function Payment() {
           <div className="space-y-4 mb-8">
             <h3 className="font-bold mb-4 flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-green-400" />
-              Select Payment Method
+              Secure Payment
             </h3>
             
-            <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'upi' ? 'bg-orange-500/10 border-orange-500' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-              <input type="radio" name="payment" value="upi" checked={paymentMethod === 'upi'} onChange={() => setPaymentMethod('upi')} className="w-5 h-5 accent-orange-500" />
+            <div className="flex items-center gap-4 p-4 rounded-xl border bg-orange-500/10 border-orange-500 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-orange-400" />
+                  <ShieldCheck className="w-5 h-5 text-green-400" />
                 </div>
                 <div>
-                  <div className="font-bold">UPI / QR Code</div>
-                  <div className="text-xs text-gray-400">GPay, PhonePe, Paytm</div>
+                  <div className="font-bold">Proceed to Secure Payment</div>
+                  <div className="text-xs text-gray-400">All payment methods accepted via Razorpay</div>
                 </div>
               </div>
-            </label>
-
-            <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${paymentMethod === 'card' ? 'bg-orange-500/10 border-orange-500' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-              <input type="radio" name="payment" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="w-5 h-5 accent-orange-500" />
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                  <CreditCard className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <div className="font-bold">Credit / Debit Card</div>
-                  <div className="text-xs text-gray-400">Visa, Mastercard, RuPay</div>
-                </div>
-              </div>
-            </label>
+            </div>
           </div>
 
           <button 

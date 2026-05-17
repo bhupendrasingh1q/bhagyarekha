@@ -31,14 +31,14 @@ async function run() {
     const servicesHtml = selectedServices.map(s => `<li>${s}</li>`).join('');
 
     const mailOptions = {
-      from: `"AstroJyoti" <${process.env.EMAIL_USER}>`,
+      from: `"BhagyaRekha" <${process.env.EMAIL_USER}>`,
       to: data.email,
-      subject: 'Payment Successful - AstroJyoti Order Confirmation',
+      subject: 'Payment Successful - BhagyaRekha Order Confirmation',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h2 style="color: #F97316; margin-bottom: 5px;">Order Confirmed!</h2>
-            <p style="color: #666; margin-top: 0;">Thank you for choosing AstroJyoti.</p>
+            <p style="color: #666; margin-top: 0;">Thank you for choosing BhagyaRekha.</p>
           </div>
           
           <p>Dear <strong>${data.name}</strong>,</p>
@@ -68,7 +68,7 @@ async function run() {
 
           <p style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; color: #666;">
             Warm regards,<br/>
-            <strong>The AstroJyoti Team</strong>
+            <strong>The BhagyaRekha Team</strong>
           </p>
         </div>
       `

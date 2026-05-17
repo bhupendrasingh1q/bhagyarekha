@@ -159,7 +159,7 @@ export default function Home() {
             <Sparkles className="text-white w-6 h-6" />
           </div>
           <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-orange-300 to-red-400 bg-clip-text text-transparent">
-            AstroJyoti
+            BhagyaRekha
           </span>
         </div>
         <button 
@@ -497,7 +497,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <Sparkles className="text-orange-500 w-5 h-5" />
-            <span className="text-xl font-bold">AstroJyoti</span>
+            <span className="text-xl font-bold">BhagyaRekha</span>
           </div>
           <div className="flex gap-8 text-sm text-gray-500">
             <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
@@ -505,7 +505,7 @@ export default function Home() {
             <a href="mailto:Astrojyoti9599@gmail.com" className="hover:text-white transition-colors">Contact Us</a>
           </div>
           <div className="text-gray-500 text-sm">
-            © 2026 AstroJyoti. Spiritual & Creative Services.
+            © 2026 BhagyaRekha. Spiritual & Creative Services.
           </div>
         </div>
       </footer>

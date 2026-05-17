@@ -18,7 +18,7 @@ async function run() {
     const info = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER,
-      subject: "Test Email from AstroJyoti",
+      subject: "Test Email from BhagyaRekha",
       text: "If you receive this, Nodemailer is working!"
     });
     console.log("Email sent successfully!", info.messageId);
