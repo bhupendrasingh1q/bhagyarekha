@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Heart, 
   Sparkles, 
@@ -499,9 +499,10 @@ export default function Home() {
             <Sparkles className="text-orange-500 w-5 h-5" />
             <span className="text-xl font-bold">BhagyaRekha</span>
           </div>
-          <div className="flex gap-8 text-sm text-gray-500">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+          <div className="flex gap-8 text-sm text-gray-500 flex-wrap justify-center">
+            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
             <a href="mailto:Astrojyoti9599@gmail.com" className="hover:text-white transition-colors">Contact Us</a>
           </div>
           <div className="text-gray-500 text-sm">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, CreditCard, CheckCircle2, Zap } from 'lucide-react';
 
 interface PriceOption {
@@ -149,6 +149,14 @@ export default function Payment() {
           email: order.email || '',
           contact: order.phone || ''
         },
+        method: {
+          netbanking: false,
+          card: true,
+          wallet: true,
+          upi: true,
+          emi: false,
+          paylater: false
+        },
         theme: {
           color: "#F97316"
         }
@@ -292,6 +300,14 @@ export default function Payment() {
             <div className="text-center mt-6 text-xs text-gray-500 flex items-center justify-center gap-2">
               <ShieldCheck className="w-4 h-4" />
               100% Secure Payments via Razorpay
+            </div>
+
+            <div className="flex gap-4 justify-center text-[10px] text-gray-500 mt-4 border-t border-white/5 pt-4">
+              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <span>•</span>
+              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <span>•</span>
+              <Link to="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
             </div>
         </div>
       </div>

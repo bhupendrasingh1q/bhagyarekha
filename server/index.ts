@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
@@ -24,8 +25,27 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Security Middleware
-app.use(helmet()); 
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        // Allow loading the Razorpay checkout script
+        "script-src": ["'self'", "https://checkout.razorpay.com", "https://cdn.razorpay.com"],
+        // Allow client-side checkout to connect to Razorpay APIs
+        "connect-src": ["'self'", "https://api.razorpay.com"],
+        // Allow the payment form inside an iframe
+        "frame-src": ["'self'", "https://api.razorpay.com", "https://checkout.razorpay.com"],
+        // Allow Razorpay asset images
+        "img-src": ["'self'", "https://cdn.razorpay.com", "data:"],
+      },
+    },
+    // Allow external pages (bank gateways, UPI deep-links) to open in popups
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  })
+);
 app.use(cors()); 
+
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
@@ -270,6 +290,14 @@ app.post('/api/orders/:id/verify-payment', async (req, res) => {
     console.error('Error updating order:', error);
     res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
+});
+
+// Serve React static files from dist folder in production
+app.use(express.static(path.join(__dirname, '../dist')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 // Start server
