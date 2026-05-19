@@ -242,7 +242,7 @@ app.post('/api/orders/:id/verify-payment', async (req, res) => {
 
       const servicesHtml = selectedServices.map(s => `<li>${s}</li>`).join('');
       
-      const fromEmail = process.env.RESEND_FROM_EMAIL || 'team@bhagyarekha.com';
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'team@bhagyarekha.online';
 
       const emailPayload = {
         from: `BhagyaRekha <${fromEmail}>`,
