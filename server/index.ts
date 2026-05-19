@@ -58,9 +58,11 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET || ''
 }); 
 
-// Initialize Nodemailer
+// Initialize Nodemailer with explicit secure SMTP configuration
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -284,10 +286,12 @@ app.post('/api/orders/:id/verify-payment', async (req, res) => {
         `
       };
 
-      await transporter.sendMail(mailOptions);
-      console.log(`Success email sent to ${data.email}`);
+      // Send Success Email asynchronously (non-blocking) so HTTP response returns instantly
+      transporter.sendMail(mailOptions)
+        .then(() => console.log(`Success email sent to ${data.email}`))
+        .catch(emailError => console.error('Error sending success email:', emailError));
     } catch (emailError) {
-      console.error('Error sending success email:', emailError);
+      console.error('Error constructing success email:', emailError);
     }
 
     res.json({ success: true, message: 'Payment successful', order: data });
