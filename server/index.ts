@@ -234,17 +234,19 @@ app.post('/api/orders/:id/verify-payment', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found or update failed' });
     }
 
-    // Send Success Email
+    // Send Success Email via Resend HTTP API
     try {
       const selectedServices = ['Soulmate Sketch'];
       if (data.addons && data.addons.includes('personality')) selectedServices.push('Detailed Name & Personality Report');
       if (data.addons && data.addons.includes('timeline')) selectedServices.push('Love Timeline (12 Months)');
 
       const servicesHtml = selectedServices.map(s => `<li>${s}</li>`).join('');
+      
+      const fromEmail = process.env.RESEND_FROM_EMAIL || 'team@bhagyarekha.com';
 
-      const mailOptions = {
-        from: `"BhagyaRekha" <${process.env.EMAIL_USER}>`,
-        to: data.email,
+      const emailPayload = {
+        from: `BhagyaRekha <${fromEmail}>`,
+        to: [data.email],
         subject: 'Payment Successful - BhagyaRekha Order Confirmation',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6;">
@@ -276,7 +278,7 @@ app.post('/api/orders/:id/verify-payment', async (req, res) => {
               Our intuitive artists and readers will begin meditating on your birth energy immediately. You will receive your completed sketch and reading via email within the next <strong>4 working hours</strong>.
             </p>
             
-            <p style="margin-top: 30px;">If you have any questions, feedback, or require assistance, please reply directly to this email at <a href="mailto:${process.env.EMAIL_USER}" style="color: #F97316; text-decoration: none;">${process.env.EMAIL_USER}</a>.</p>
+            <p style="margin-top: 30px;">If you have any questions, feedback, or require assistance, please reply directly to this email at <a href="mailto:${fromEmail}" style="color: #F97316; text-decoration: none;">${fromEmail}</a>.</p>
 
             <p style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; color: #666;">
               Warm regards,<br/>
@@ -286,10 +288,25 @@ app.post('/api/orders/:id/verify-payment', async (req, res) => {
         `
       };
 
-      // Send Success Email asynchronously (non-blocking) so HTTP response returns instantly
-      transporter.sendMail(mailOptions)
-        .then(() => console.log(`Success email sent to ${data.email}`))
-        .catch(emailError => console.error('Error sending success email:', emailError));
+      // Send non-blocking HTTP POST request to Resend API
+      fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(emailPayload)
+      })
+        .then(async (response) => {
+          const responseData = await response.json();
+          if (response.ok) {
+            console.log(`Success email sent to ${data.email} via Resend:`, responseData);
+          } else {
+            console.error('Resend API returned an error:', responseData);
+          }
+        })
+        .catch(emailError => console.error('Error calling Resend API:', emailError));
+
     } catch (emailError) {
       console.error('Error constructing success email:', emailError);
     }
