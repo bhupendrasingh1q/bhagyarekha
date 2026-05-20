@@ -66,6 +66,20 @@ export default function Payment() {
     fetchOrder();
   }, [orderId, navigate]);
 
+  // Track InitiateCheckout in Meta Pixel once when order is successfully loaded
+  useEffect(() => {
+    if (order && typeof (window as any).fbq === 'function') {
+      (window as any).fbq('track', 'InitiateCheckout', {
+        value: totalPrice,
+        currency: 'INR',
+        content_name: 'Soulmate Sketch & Reading',
+        content_ids: [orderId],
+        content_type: 'product'
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order]);
+
   const toggleAddon = (id: string) => {
     setSelectedAddons(prev => 
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
@@ -134,6 +148,17 @@ export default function Payment() {
             const verifyData = await verifyResponse.json();
             
             if (verifyData.success) {
+              // Track Purchase in Meta Pixel
+              if (typeof (window as any).fbq === 'function') {
+                (window as any).fbq('track', 'Purchase', {
+                  value: totalPrice,
+                  currency: 'INR',
+                  content_name: 'Soulmate Sketch & Reading',
+                  content_ids: [orderId],
+                  content_type: 'product'
+                });
+              }
+
               alert('Payment successful! Your order is now confirmed.');
               navigate('/'); // Or navigate to a success page
             } else {

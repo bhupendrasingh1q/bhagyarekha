@@ -129,6 +129,14 @@ export default function Home() {
         throw new Error(result.message || (result.errors ? result.errors.join(', ') : 'Something went wrong. Please try again.'));
       }
 
+      // Track Lead / Form Submission in Meta Pixel
+      if (typeof (window as any).fbq === 'function') {
+        (window as any).fbq('track', 'Lead', {
+          content_name: 'Soulmate Sketch Form Submission',
+          status: 'success'
+        });
+      }
+
       navigate(`/payment/${result.orderId}`);
       // Optionally reset form: setFormData({ name: '', email: '', phone: '', dob: '', gender: 'female' });
     } catch (error: any) {
