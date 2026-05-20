@@ -188,6 +188,12 @@ export default function Payment() {
 
   return (
     <div className="min-h-screen bg-[#0F0718] bg-mandala text-white font-sans flex flex-col items-center py-12 px-6">
+      {/* Top Secure Banner */}
+      <div className="w-full max-w-xl mb-6 bg-emerald-500/10 border border-emerald-500/20 py-2.5 px-4 rounded-2xl text-center text-xs font-semibold tracking-wider text-emerald-400 flex items-center justify-center gap-2 shadow-lg">
+        <ShieldCheck className="w-4 h-4 fill-emerald-500/20 text-emerald-400" />
+        <span>🔒 100% Fully Secure Checkout & Approved Safe Website</span>
+      </div>
+
       <div className="w-full max-w-xl">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-300 to-red-400 bg-clip-text text-transparent">Customize & Complete</h1>
@@ -280,6 +286,12 @@ export default function Payment() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Cyan Refund Guarantee */}
+          <div className="mb-6 p-4 bg-cyan-950/45 border border-cyan-400/30 rounded-2xl flex items-center gap-3 text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
+            <span className="text-xl">🤝</span>
+            <span>If not satisfied by the sketch, get a full refund!</span>
           </div>
 
           <button 

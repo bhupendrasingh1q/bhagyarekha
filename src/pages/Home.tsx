@@ -147,8 +147,24 @@ export default function Home() {
       {/* Promo Bar */}
       <div className="bg-gradient-to-r from-[#FF9933] to-[#FF4500] text-white py-2 text-center text-sm font-semibold tracking-wide">
         <span className="flex items-center justify-center gap-2">
-          <Zap className="w-4 h-4 fill-white" />
+          <Zap className="w-4 h-4 fill-white animate-pulse" />
           LIMITED TIME OFFER: 75% OFF ENDS IN {formatTime(timeLeft)}
+        </span>
+      </div>
+
+      {/* Trust & Security Bar */}
+      <div className="bg-[#150C24] border-b border-white/5 py-1.5 px-4 text-center text-xs font-medium tracking-wider text-gray-300 flex items-center justify-center gap-4 flex-wrap">
+        <span className="flex items-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-400 fill-emerald-400/10" />
+          <span className="text-emerald-400 font-bold uppercase">Fully Secure & Approved Safe</span>
+        </span>
+        <span className="hidden md:inline text-white/10">•</span>
+        <span className="flex items-center gap-1">
+          <span>🔒 256-Bit SSL Encrypted Connection</span>
+        </span>
+        <span className="hidden md:inline text-white/10">•</span>
+        <span className="flex items-center gap-1">
+          <span>🎯 Satisfaction Guaranteed</span>
         </span>
       </div>
 
@@ -184,9 +200,15 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="relative z-10"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-400 text-xs font-bold uppercase tracking-widest mb-6">
-              <Star className="w-3 h-3 fill-orange-400" />
-              Trusted by 50,000+ Seekers
+            <div className="flex flex-wrap gap-2.5 mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-400 text-xs font-bold uppercase tracking-widest">
+                <Star className="w-3 h-3 fill-orange-400" />
+                Trusted by 50,000+ Seekers
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-bold uppercase tracking-widest">
+                <ShieldCheck className="w-3.5 h-3.5 fill-emerald-500/20 text-emerald-400" />
+                Fully Secure & Approved Safe
+              </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
               Reveal the Face of <br />
@@ -197,6 +219,15 @@ export default function Home() {
               Our talented spiritual artists blend psychic insight with artistic skill 
               to create a drawing that goes beyond imagination.
             </p>
+
+            {/* Cyan Refund Guarantee */}
+            <div className="mb-8 p-4 bg-cyan-950/45 border border-cyan-400/30 rounded-2xl flex items-center gap-3 text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-950/20 max-w-xl backdrop-blur-sm">
+              <span className="flex-shrink-0 text-xl">🤝</span>
+              <span>
+                <strong className="text-white block mb-0.5">100% Risk-Free Guarantee:</strong>
+                If not satisfied by the sketch, get a full refund!
+              </span>
+            </div>
             
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
               <button 
@@ -319,7 +350,11 @@ export default function Home() {
           
           {/* Form */}
           <div className="p-8 glass-card rounded-3xl">
-            <h2 className="text-3xl font-bold mb-8 text-center">Get Your Divine Sketch</h2>
+            <h2 className="text-3xl font-bold mb-4 text-center">Get Your Divine Sketch</h2>
+            <div className="mb-8 flex justify-center items-center gap-2 text-xs text-gray-400 bg-white/5 py-2 px-4 rounded-xl border border-white/5">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 fill-emerald-400/10" />
+              <span>100% Secure Checkout | SSL Encrypted & Verified Safe</span>
+            </div>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">FULL NAME *</label>
@@ -437,6 +472,12 @@ export default function Home() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Cyan Refund Guarantee */}
+              <div className="p-4 bg-cyan-950/45 border border-cyan-400/30 rounded-2xl flex items-center gap-3 text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
+                <span className="text-xl">🤝</span>
+                <span>If not satisfied by the sketch, get a full refund!</span>
               </div>
 
               <button 
