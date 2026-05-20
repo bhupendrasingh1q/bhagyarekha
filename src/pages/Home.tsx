@@ -152,22 +152,6 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Trust & Security Bar */}
-      <div className="bg-[#150C24] border-b border-white/5 py-1.5 px-4 text-center text-xs font-medium tracking-wider text-gray-300 flex items-center justify-center gap-4 flex-wrap">
-        <span className="flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-emerald-400 fill-emerald-400/10" />
-          <span className="text-emerald-400 font-bold uppercase">Fully Secure & Approved Safe</span>
-        </span>
-        <span className="hidden md:inline text-white/10">•</span>
-        <span className="flex items-center gap-1">
-          <span>🔒 256-Bit SSL Encrypted Connection</span>
-        </span>
-        <span className="hidden md:inline text-white/10">•</span>
-        <span className="flex items-center gap-1">
-          <span>🎯 Satisfaction Guaranteed</span>
-        </span>
-      </div>
-
       {/* Header */}
       <nav className="sticky top-0 z-50 bg-[#0F0718]/80 backdrop-blur-md border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center">
         <div className="flex items-center gap-2">
