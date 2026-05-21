@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ShieldCheck, CreditCard, CheckCircle2, Zap } from 'lucide-react';
+import { ShieldCheck, CheckCircle2, Flame, Sparkles } from 'lucide-react';
 
 interface PriceOption {
   id: string;
@@ -8,7 +8,8 @@ interface PriceOption {
   price: number;
   originalPrice: number;
   description: string;
-  recommended?: boolean;
+  badge?: string;
+  badgeStyle?: string;
 }
 
 const PRICE_OPTIONS: PriceOption[] = [
@@ -24,15 +25,18 @@ const PRICE_OPTIONS: PriceOption[] = [
     title: "Detailed Name & Personality Report",
     price: 149,
     originalPrice: 299,
-    description: "Learn their traits, habits, and mindset.",
-    recommended: true
+    description: "Name, emotional traits, mindset, habits, and compatibility patterns.",
+    badge: "Recommended",
+    badgeStyle: "bg-purple-100 text-purple-700 border-purple-200/50"
   },
   {
     id: 'timeline',
-    title: "Love Timeline (12 Months)",
+    title: "Love Timeline Reading (12 Months)",
     price: 149,
     originalPrice: 299,
-    description: "When and where you will meet them."
+    description: "When you may meet, key months, and future romantic energy shifts.",
+    badge: "Most customers add this",
+    badgeStyle: "bg-pink-100 text-pink-700 border-pink-200/50"
   }
 ];
 
@@ -43,7 +47,7 @@ export default function Payment() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   
-  // Addon state moved here
+  // Set default addons
   const [selectedAddons, setSelectedAddons] = useState<string[]>(['personality']);
 
   useEffect(() => {
@@ -66,6 +70,12 @@ export default function Payment() {
     fetchOrder();
   }, [orderId, navigate]);
 
+  // Keep exact original pricing logic
+  const basePrice = 99;
+  const addonPrice = 149;
+  const comboDiscount = selectedAddons.length >= 2 ? 100 : 0;
+  const totalPrice = basePrice + selectedAddons.length * addonPrice - comboDiscount;
+
   // Track InitiateCheckout in Meta Pixel once when order is successfully loaded
   useEffect(() => {
     if (order && typeof (window as any).fbq === 'function') {
@@ -85,8 +95,6 @@ export default function Payment() {
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     );
   };
-
-  const totalPrice = 99 + selectedAddons.length * 149 - (selectedAddons.length >= 2 ? 100 : 0);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -183,7 +191,7 @@ export default function Payment() {
           paylater: false
         },
         theme: {
-          color: "#F97316"
+          color: "#A855F7"
         }
       };
 
@@ -203,8 +211,8 @@ export default function Payment() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0F0718] flex items-center justify-center text-white">
-        <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-astro-light flex items-center justify-center text-[#5C1A60]">
+        <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -212,141 +220,169 @@ export default function Payment() {
   if (!order) return null;
 
   return (
-    <div className="min-h-screen bg-[#0F0718] bg-mandala text-white font-sans flex flex-col items-center py-12 px-6">
+    <div className="min-h-screen bg-astro-light text-[#3C1642] font-sans flex flex-col items-center py-8 px-4 sm:px-6">
+      
       {/* Top Secure Banner */}
-      <div className="w-full max-w-xl mb-6 bg-emerald-500/10 border border-emerald-500/20 py-2.5 px-4 rounded-2xl text-center text-xs font-semibold tracking-wider text-emerald-400 flex items-center justify-center gap-2 shadow-lg">
-        <ShieldCheck className="w-4 h-4 fill-emerald-500/20 text-emerald-400" />
-        <span>🔒 100% Fully Secure Checkout & Approved Safe Website</span>
+      <div className="w-full max-w-md mb-6 bg-purple-100/50 border border-purple-200/30 py-2.5 px-4 rounded-full text-center text-[10px] font-bold uppercase tracking-wider text-purple-700 flex items-center justify-center gap-1.5 shadow-sm">
+        <ShieldCheck className="w-4 h-4 text-purple-600" />
+        <span>100% Fully Secure Checkout & Approved Safe Website</span>
       </div>
 
-      <div className="w-full max-w-xl">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-300 to-red-400 bg-clip-text text-transparent">Customize & Complete</h1>
-          <p className="text-gray-400">Add any extras you want before completing your payment.</p>
+      <div className="w-full max-w-md space-y-4">
+        
+        {/* Basic Purchase Header Card */}
+        <div className="astro-card p-5 flex items-center justify-between border-purple-200/20">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center shadow-inner border border-purple-200/40 relative">
+              <Sparkles className="w-6 h-6 text-purple-600 animate-pulse" />
+            </div>
+            <div>
+              <h2 className="text-base font-black text-[#5C1A60] font-sans">
+                Soulmate Sketch For {order.name}
+              </h2>
+              <p className="text-[11px] text-purple-600/70 font-semibold flex items-center gap-1 mt-0.5">
+                Delivery in 6 to 12 hours
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-xs line-through text-purple-600/40">₹{PRICE_OPTIONS[0].originalPrice}</div>
+            <div className="font-black text-xl text-purple-700">₹{PRICE_OPTIONS[0].price}</div>
+            <div className="text-[9px] font-bold text-pink-600 flex items-center justify-end gap-0.5 mt-0.5">
+              <Flame className="w-2.5 h-2.5 fill-pink-500 text-pink-500" />
+              <span>Limited Offer</span>
+            </div>
+          </div>
         </div>
 
-        {/* Pricing & Addons */}
-        <div className="space-y-8 mb-8">
-          <div className="p-8 glass-card rounded-3xl border border-white/10 bg-white/[0.02]">
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              Order Summary
-              <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded-md">Save ₹300+</span>
-            </h3>
-            
-            <div className="space-y-4 mb-8">
-              <div className="flex justify-between items-center p-4 bg-orange-500/5 border border-orange-500/10 rounded-xl">
-                <div>
-                  <div className="font-bold">Soulmate Sketch</div>
-                  <div className="text-xs text-orange-400 font-bold">Limited Offer Applied</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm line-through text-gray-500">₹299</div>
-                  <div className="font-bold text-lg">₹99</div>
-                </div>
+        {/* Combo Discount Banner Card */}
+        <div className="astro-card bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100/50 p-4 text-center">
+          <span className="text-xs font-bold text-purple-800">
+            Add both reports below and Get <span className="text-pink-600">₹100 Combo discount</span>.
+          </span>
+        </div>
+
+        {/* Customized Checklist */}
+        <div className="space-y-3">
+          {PRICE_OPTIONS.slice(1).map(option => (
+            <label 
+              key={option.id}
+              className={`astro-card p-5 flex items-start gap-4 transition-all cursor-pointer select-none relative ${
+                selectedAddons.includes(option.id) 
+                  ? 'border-purple-300 ring-1 ring-purple-300/30' 
+                  : 'hover:border-purple-200'
+              }`}
+            >
+              <div className="pt-0.5">
+                <input 
+                  type="checkbox" 
+                  className="w-4.5 h-4.5 accent-purple-600 cursor-pointer rounded-md"
+                  checked={selectedAddons.includes(option.id)}
+                  onChange={() => toggleAddon(option.id)}
+                />
               </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                  <span className="font-bold text-xs sm:text-sm text-[#5C1A60]">{option.title}</span>
+                  {option.badge && (
+                    <span className={`text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider border ${option.badgeStyle}`}>
+                      {option.badge}
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-purple-950/60 leading-relaxed">{option.description}</p>
+              </div>
+              <div className="text-right font-black text-sm text-purple-600">
+                + ₹{option.price}
+              </div>
+            </label>
+          ))}
+        </div>
 
-              {PRICE_OPTIONS.slice(1).map(option => (
-                <label 
-                  key={option.id}
-                  className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
-                    selectedAddons.includes(option.id) 
-                      ? 'bg-purple-500/10 border-purple-500/50' 
-                      : 'bg-white/5 border-white/5 hover:border-white/20'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 accent-purple-500"
-                      checked={selectedAddons.includes(option.id)}
-                      onChange={() => toggleAddon(option.id)}
-                    />
-                    <div>
-                      <div className="font-bold flex items-center gap-2">
-                        {option.title}
-                        {option.recommended && (
-                          <span className="text-[10px] px-1.5 py-0.5 bg-purple-500 text-white rounded uppercase font-black">Best</span>
-                        )}
-                      </div>
-                      <div className="text-xs text-gray-400">{option.description}</div>
-                    </div>
-                  </div>
-                  <div className="font-bold text-purple-400">+₹149</div>
-                </label>
-              ))}
+        {/* Live Order Summary Grid */}
+        <div className="astro-card p-5 border-purple-200/20">
+          <h3 className="text-sm font-black text-[#5C1A60] font-sans border-b border-purple-50 pb-3 mb-3">
+            Order Summary
+          </h3>
+          
+          <div className="space-y-2 text-xs text-purple-950/70">
+            <div className="flex justify-between items-center">
+              <span>Soulmate Sketch</span>
+              <span className="font-semibold">₹{basePrice}</span>
             </div>
-
-            {selectedAddons.length >= 2 && (
-              <div className="mb-6 p-3 bg-green-500/10 border border-green-500/20 rounded-xl flex items-center justify-between text-green-400 text-sm font-bold">
-                <span>Special Combo Discount:</span>
-                <span>- ₹100</span>
+            
+            {selectedAddons.includes('personality') && (
+              <div className="flex justify-between items-center">
+                <span>Soulmate Personality Report</span>
+                <span className="font-semibold">+ ₹{addonPrice}</span>
+              </div>
+            )}
+            
+            {selectedAddons.includes('timeline') && (
+              <div className="flex justify-between items-center">
+                <span>When Will You Meet Report</span>
+                <span className="font-semibold">+ ₹{addonPrice}</span>
               </div>
             )}
 
-            <div className="pt-6 border-t border-white/10">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-gray-400 uppercase tracking-widest text-xs font-bold">Total Amount</span>
-                <span className="text-3xl font-black">₹{totalPrice}</span>
+            {comboDiscount > 0 && (
+              <div className="flex justify-between items-center text-pink-600 font-bold border-t border-purple-50/50 pt-2">
+                <span>Special Combo Discount:</span>
+                <span>- ₹{comboDiscount}</span>
               </div>
+            )}
+
+            <div className="flex justify-between items-center text-[#5C1A60] font-black text-base border-t border-purple-100 pt-3 mt-3">
+              <span>Total</span>
+              <span className="text-lg">₹{totalPrice}</span>
             </div>
           </div>
         </div>
 
-        {/* Payment Methods */}
-        <div className="p-8 glass-card rounded-3xl border border-white/10 bg-white/[0.02]">
-          <div className="space-y-4 mb-8">
-            <h3 className="font-bold mb-4 flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-green-400" />
-              Secure Payment
-            </h3>
-            
-            <div className="flex items-center gap-4 p-4 rounded-xl border bg-orange-500/10 border-orange-500 transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                  <ShieldCheck className="w-5 h-5 text-green-400" />
-                </div>
-                <div>
-                  <div className="font-bold">Proceed to Secure Payment</div>
-                  <div className="text-xs text-gray-400">All payment methods accepted via Razorpay</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cyan Refund Guarantee */}
-          <div className="mb-6 p-4 bg-cyan-950/45 border border-cyan-400/30 rounded-2xl flex items-center gap-3 text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
-            <span className="text-xl">🤝</span>
+        {/* Checkout Button & Security info */}
+        <div className="astro-card p-6 border-purple-200/20 text-center">
+          
+          {/* Refund Notice */}
+          <div className="mb-4 p-3 bg-purple-100/40 border border-purple-200/20 rounded-xl flex items-center justify-center gap-2 text-[#5C1A60] text-xs font-semibold">
+            <span>🤝</span>
             <span>If not satisfied by the sketch, get a full refund!</span>
           </div>
 
           <button 
             onClick={handlePayment}
             disabled={processing}
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl font-bold text-xl shadow-lg shadow-orange-600/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"
+            className="w-full py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full font-bold text-white text-base shadow-lg shadow-pink-500/10 hover:shadow-xl hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
           >
             {processing ? (
-              <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                <CheckCircle2 className="w-6 h-6" />
-                Pay ₹{totalPrice} Now
+                <CheckCircle2 className="w-5 h-5" />
+                Proceed to Secure Payment
               </>
             )}
           </button>
           
-            <div className="text-center mt-6 text-xs text-gray-500 flex items-center justify-center gap-2">
-              <ShieldCheck className="w-4 h-4" />
-              100% Secure Payments via Razorpay
-            </div>
+          <div className="text-[10px] text-purple-600/40 mt-4 flex items-center justify-center gap-1.5 font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>100% Secure Payments via Razorpay</span>
+          </div>
 
-            <div className="flex gap-4 justify-center text-[10px] text-gray-500 mt-4 border-t border-white/5 pt-4">
-              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <span>•</span>
-              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <span>•</span>
-              <Link to="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
-            </div>
+          {/* Support Email */}
+          <div className="text-[11px] text-purple-950/60 mt-5 border-t border-purple-50 pt-4">
+            For support, please email us at <a href="mailto:Astrojyoti9599@gmail.com" className="font-bold text-purple-700 hover:underline">Astrojyoti9599@gmail.com</a>
+          </div>
+
+          {/* Custom Footer Links */}
+          <div className="flex gap-4 justify-center text-[9px] text-purple-600/40 mt-3">
+            <Link to="/privacy" className="hover:text-purple-900 transition-colors">Privacy Policy</Link>
+            <span>•</span>
+            <Link to="/terms" className="hover:text-purple-900 transition-colors">Terms of Service</Link>
+            <span>•</span>
+            <Link to="/refund" className="hover:text-purple-900 transition-colors">Refund Policy</Link>
+          </div>
         </div>
+
       </div>
     </div>
   );

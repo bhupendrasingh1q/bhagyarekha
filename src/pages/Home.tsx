@@ -23,7 +23,18 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-// Types
+// Indian States list
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", 
+  "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", 
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", 
+  "Lakshadweep", "Puducherry"
+];
+
+// Customer Reviews matching the screenshot exactly
 interface Review {
   name: string;
   location: string;
@@ -53,66 +64,127 @@ const REVIEWS: Review[] = [
   {
     name: "Sanjana S.",
     location: "Pune",
-    text: "I was skeptical at first, but the artist really captured a certain energy that I felt. The delivery was fast too!",
-    rating: 4
+    text: "The timeline prediction actually matched the month I met someone special. Totally worth it.",
+    rating: 5
+  },
+  {
+    name: "Karan B.",
+    location: "Delhi NCR",
+    text: "Timeline reading me 3 months bola tha... aur exactly 3 months me koi special mila. I don't know how, but amazing!",
+    rating: 5
+  },
+  {
+    name: "Pooja Singh",
+    location: "Varanasi",
+    text: "यह देखकर दिल खुश हो गया। ऐसा लग रहा था कि यह कोई साधारण चित्र नहीं बल्कि एक जीवित चेहरा है।",
+    rating: 5
+  },
+  {
+    name: "Simon L.",
+    location: "Chandigarh",
+    text: "My soulmate sketch was so cute! Looks like an actual person, not a random drawing. Loved it. ❤️",
+    rating: 5
+  },
+  {
+    name: "Raghav M.",
+    location: "Jaipur",
+    text: "Very detailed and personal. Didn't feel generic at all. Sketch felt meaningful.",
+    rating: 5
+  },
+  {
+    name: "Neha Mishra",
+    location: "Bhopal",
+    text: "बहुत ही सटीक चित्र। मुझे ऐसा लगा जैसे मैं अपने होने वाले साथी को सच में देख रही हूँ।",
+    rating: 5
+  },
+  {
+    name: "Manish R.",
+    location: "Indore",
+    text: "Personality reading is very accurate. Aisa laga ki aap mujhe achhe se jante ho.",
+    rating: 5
+  },
+  {
+    name: "Amit P.",
+    location: "Bangalore",
+    text: "The reading described qualities I always wanted in a partner. Felt very connected.",
+    rating: 5
   }
 ];
 
-const SAMPLE_IMAGES = [
-  '/samples/1.jpg',
-  '/samples/2.jpg',
-  '/samples/3.jpg',
-  '/samples/4.jpg'
-];
 export default function Home() {
   const navigate = useNavigate();
-  const [timeLeft, setTimeLeft] = useState(7993); // Approx 2h 13m
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    dob: '',
+    dob: '', // Merged value: YYYY-MM-DD
     gender: 'female',
-    tob: '',
+    tob: '', // Merged value: HH:MM
     pobCity: '',
     pobState: ''
   });
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  // Separate states for UI dropdowns matching screenshot
+  const [dobDay, setDobDay] = useState('');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobYear, setDobYear] = useState('');
+
+  const [tobHour, setTobHour] = useState('');
+  const [tobMinute, setTobMinute] = useState('');
+  const [tobAmPm, setTobAmPm] = useState('AM');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Dynamic automatic merging of Day, Month, Year into formData.dob YYYY-MM-DD
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    
-    const imageTimer = setInterval(() => {
-      setCurrentImageIndex(prev => (prev + 1) % SAMPLE_IMAGES.length);
-    }, 4000);
+    if (dobDay && dobMonth && dobYear) {
+      setFormData(prev => ({
+        ...prev,
+        dob: `${dobYear}-${dobMonth}-${dobDay}`
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        dob: ''
+      }));
+    }
+  }, [dobDay, dobMonth, dobYear]);
 
-    return () => {
-      clearInterval(timer);
-      clearInterval(imageTimer);
-    };
-  }, []);
-
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h}h ${m}m ${s}s`;
-  };
-
-
+  // Dynamic automatic merging of Hour, Minute, AM/PM into formData.tob HH:MM
+  useEffect(() => {
+    if (tobHour && tobMinute && tobAmPm) {
+      let hr = parseInt(tobHour);
+      if (tobAmPm === 'PM' && hr < 12) hr += 12;
+      if (tobAmPm === 'AM' && hr === 12) hr = 0;
+      const hrStr = hr.toString().padStart(2, '0');
+      setFormData(prev => ({
+        ...prev,
+        tob: `${hrStr}:${tobMinute}`
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        tob: ''
+      }));
+    }
+  }, [tobHour, tobMinute, tobAmPm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.dob) {
+      alert("Please select a complete Date of Birth (Day, Month, Year).");
+      return;
+    }
+    if (!formData.tob) {
+      alert("Please select a complete Time of Birth (Hour, Minute, AM/PM).");
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      const payload = {
-        ...formData
-      };
+      const payload = { ...formData };
 
       const response = await fetch('/api/orders', {
         method: 'POST',
@@ -125,7 +197,6 @@ export default function Home() {
       const result = await response.json();
 
       if (!response.ok) {
-        // If there are specific validation errors, we could show them, but for now a generic alert is fine
         throw new Error(result.message || (result.errors ? result.errors.join(', ') : 'Something went wrong. Please try again.'));
       }
 
@@ -138,7 +209,6 @@ export default function Home() {
       }
 
       navigate(`/payment/${result.orderId}`);
-      // Optionally reset form: setFormData({ name: '', email: '', phone: '', dob: '', gender: 'female' });
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -150,408 +220,466 @@ export default function Home() {
     document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  return (
-    <div className="min-h-screen bg-[#0F0718] bg-mandala text-white font-sans selection:bg-orange-500/30">
-      {/* Promo Bar */}
-      <div className="bg-gradient-to-r from-[#FF9933] to-[#FF4500] text-white py-2 text-center text-sm font-semibold tracking-wide">
-        <span className="flex items-center justify-center gap-2">
-          <Zap className="w-4 h-4 fill-white animate-pulse" />
-          LIMITED TIME OFFER: 75% OFF ENDS IN {formatTime(timeLeft)}
-        </span>
-      </div>
+  // Helper arrays for date / time loops
+  const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, '0'));
+  
+  const months = [
+    { value: "01", label: "January" },
+    { value: "02", label: "February" },
+    { value: "03", label: "March" },
+    { value: "04", label: "April" },
+    { value: "05", label: "May" },
+    { value: "06", label: "June" },
+    { value: "07", label: "July" },
+    { value: "08", label: "August" },
+    { value: "09", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" }
+  ];
 
-      {/* Header */}
-      <nav className="sticky top-0 z-50 bg-[#0F0718]/80 backdrop-blur-md border-b border-white/5 py-4 px-6 md:px-12 flex justify-between items-center">
+  const years = Array.from({ length: 87 }, (_, i) => String(2026 - i)); // 1940 to 2026
+  
+  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+
+  return (
+    <div className="min-h-screen bg-astro-light text-[#3C1642] font-sans selection:bg-purple-200">
+      
+      {/* Header Container */}
+      <header className="py-6 px-6 max-w-4xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
-            <Sparkles className="text-white w-6 h-6" />
+          <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-md shadow-purple-500/10">
+            <Sparkles className="text-white w-5 h-5 animate-pulse" />
           </div>
-          <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-orange-300 to-red-400 bg-clip-text text-transparent">
+          <span className="text-xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-pink-600 font-sans">
             BhagyaRekha
           </span>
         </div>
         <button 
           onClick={scrollToForm}
-          className="hidden md:block px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-all text-sm font-medium"
+          className="px-5 py-2 bg-purple-100 hover:bg-purple-200/70 border border-purple-200/50 rounded-full transition-all text-xs font-semibold text-purple-800"
         >
-          My Review
+          Get My Sketch
         </button>
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-12 pb-24 px-6 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none opacity-20">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600 rounded-full blur-[120px]" />
-          <div className="absolute top-[20%] right-[-10%] w-[30%] h-[30%] bg-orange-600 rounded-full blur-[100px]" />
-        </div>
+      {/* Main Container mimicking mobilish preview centered on desktop */}
+      <main className="max-w-xl mx-auto px-4 md:px-0 pb-32">
+        
+        {/* Intro Hero Section */}
+        <section className="text-center pt-8 pb-10">
+          <h1 className="text-4xl md:text-5xl font-black text-[#5C1A60] leading-tight font-serif mb-4">
+            See Your Soulmate's Face
+          </h1>
+          <p className="text-base text-purple-950/80 leading-relaxed font-sans max-w-lg mx-auto mb-8 px-2">
+            Your soulmate already exists — our intuitive artist connects with your birth energy to reveal how they look and when they'll appear in your life.
+          </p>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative z-10"
-          >
-            <div className="flex flex-wrap gap-2.5 mb-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full text-orange-400 text-xs font-bold uppercase tracking-widest">
-                <Star className="w-3 h-3 fill-orange-400" />
-                Trusted by 50,000+ Seekers
-              </div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-xs font-bold uppercase tracking-widest">
-                <ShieldCheck className="w-3.5 h-3.5 fill-emerald-500/20 text-emerald-400" />
-                Fully Secure & Approved Safe
-              </div>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-              Reveal the Face of <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">Your Soulmate</span>
-            </h1>
-            <p className="text-lg text-gray-400 mb-8 max-w-xl leading-relaxed">
-              Have you ever wondered what your true soulmate actually looks like? 
-              Our talented spiritual artists blend psychic insight with artistic skill 
-              to create a drawing that goes beyond imagination.
-            </p>
+          <div className="flex justify-center mb-5">
+            <button 
+              onClick={scrollToForm}
+              className="w-full sm:w-auto px-10 py-4.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-bold text-lg shadow-lg shadow-pink-500/20 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+            >
+              Reveal My Soulmate Now
+            </button>
+          </div>
+          
+          <div className="text-xs font-semibold text-purple-600/70 uppercase tracking-wider">
+            Over 1,00,000+ sketches delivered
+          </div>
+        </section>
 
-            {/* Cyan Refund Guarantee */}
-            <div className="mb-8 p-4 bg-cyan-950/45 border border-cyan-400/30 rounded-2xl flex items-center gap-3 text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-950/20 max-w-xl backdrop-blur-sm">
-              <span className="flex-shrink-0 text-xl">🤝</span>
-              <span>
-                <strong className="text-white block mb-0.5">100% Risk-Free Guarantee:</strong>
-                If not satisfied by the sketch, get a full refund!
-              </span>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
-              <button 
-                onClick={scrollToForm}
-                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl font-bold text-lg shadow-xl shadow-orange-600/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                Get My Sketch Now
-                <ChevronRight className="w-5 h-5" />
-              </button>
-              <div className="flex -space-x-3 items-center ml-2">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-[#0F0718] bg-gray-600 overflow-hidden">
-                    <img src={`/reviews/${i}.jpg`} alt="Reviewer" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                <div className="ml-6 text-sm text-gray-400 font-medium">
-                  <span className="text-white block">Excellent 4.9/5</span>
-                  from latest reviews
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative lg:h-[600px] flex items-center justify-center"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-orange-500/20 to-transparent rounded-3xl rotate-3 blur-2xl" />
-            <div className="relative w-full max-w-md aspect-[3/4] bg-neutral-900/40 rounded-3xl border border-white/10 p-4 backdrop-blur-sm shadow-2xl overflow-hidden group">
-              <AnimatePresence>
-                <motion.div 
-                  key={currentImageIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.5 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 2.5 }}
-                  className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-1000"
-                  style={{ backgroundImage: `url(${SAMPLE_IMAGES[currentImageIndex]})` }}
+        {/* Hero Sketch Collage */}
+        <section className="flex justify-center mb-16">
+          <div className="relative w-full aspect-[1/1.05] sm:aspect-[4/5] bg-white rounded-3xl p-3 shadow-xl border border-purple-100/50 max-w-md">
+            <div className="w-full h-full rounded-2xl overflow-hidden relative flex flex-col">
+              
+              {/* Top Half - Male Sketch */}
+              <div className="h-[49.5%] w-full overflow-hidden border-b-2 border-[#FAF2F0]">
+                <img 
+                  src="/samples/1.jpg" 
+                  alt="Male Soulmate Sketch" 
+                  className="w-full h-full object-cover object-[center_15%] filter contrast-[1.05] brightness-[0.98]" 
                 />
-              </AnimatePresence>
-              <div className="relative h-full border border-white/5 rounded-2xl flex flex-col items-center justify-end p-8 bg-gradient-to-t from-black via-black/40 to-transparent">
-                <div className="text-center">
-                  <div className="text-xs font-bold text-orange-400 uppercase tracking-widest mb-2">Sample Result</div>
-                  <h3 className="text-2xl font-bold mb-2">Soulmate Portrait</h3>
-                  <p className="text-sm text-gray-300">Created through meditative visualization of birth energy.</p>
-                </div>
+              </div>
+              
+              {/* Bottom Half - Female Sketch */}
+              <div className="h-[50.5%] w-full overflow-hidden">
+                <img 
+                  src="/samples/2.jpg" 
+                  alt="Female Soulmate Sketch" 
+                  className="w-full h-full object-cover object-[center_35%] filter contrast-[1.05] brightness-[0.98]" 
+                />
+              </div>
+
+              {/* Astrological circular details/seal overlay for premium aesthetic */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-lg border border-purple-100">
+                <Sparkles className="w-5 h-5 text-purple-500 animate-spin-slow" />
               </div>
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-24 px-6 bg-white/[0.02]">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">The Power of Clarity</h2>
-            <p className="text-gray-400 max-w-2xl mx-auto">
-              Our personalized soulmate portrait is designed to give you more than just a picture; it's a bridge to your destiny.
-            </p>
           </div>
+        </section>
+
+        {/* "How It Works" Section */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-black text-center text-[#5C1A60] font-serif mb-8">
+            How It Works
+          </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="space-y-4 mb-8">
             {[
-              { 
-                icon: Heart, 
-                title: "Deep Connection", 
-                desc: "Feel an immediate sense of recognition and emotional surge when you see their features." 
+              {
+                number: "1",
+                title: "Share Your Details",
+                desc: "Enter your name, birth details and energy vibes."
               },
-              { 
-                icon: ShieldCheck, 
-                title: "Emotional Insight", 
-                desc: "Gain clarity on the spiritual bond and soul-level compatibility you share with them." 
+              {
+                number: "2",
+                title: "Artist Connects",
+                desc: "Our intuitive artist meditates using your birth energy to visualize your soulmate's features."
               },
-              { 
-                icon: Clock, 
-                title: "Future Glimpse", 
-                desc: "See the person destined to play the most significant role in your life's journey." 
+              {
+                number: "3",
+                title: "Receive Your Sketch",
+                desc: "Within 6–12 hours, receive your portrait and personality reading."
               }
-            ].map((item, idx) => (
-              <div key={idx} className="p-8 glass-card rounded-3xl group">
-                <div className="w-14 h-14 bg-orange-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <item.icon className="text-orange-500 w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold mb-4">{item.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">How It Works</h2>
-          <div className="space-y-4">
-            {[
-              { step: "01", title: "Share Your Details", desc: "Enter your name, birth details, and current energy status." },
-              { step: "02", title: "Artist Connects", desc: "Our intuitive artist meditates using your birth energy to visualize your soulmate's features." },
-              { step: "03", title: "Receive Your Sketch", desc: "Within 4 working hours, receive your portrait and personality reading via email." }
             ].map((s, i) => (
-              <div key={i} className="flex gap-6 p-6 bg-white/5 rounded-2xl border border-white/5">
-                <div className="text-2xl font-black text-orange-500/20">{s.step}</div>
+              <div key={i} className="astro-card p-6 flex gap-4 items-start">
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-purple-100 text-purple-700 font-bold flex items-center justify-center text-sm border border-purple-200/50">
+                  {s.number}
+                </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2">{s.title}</h3>
-                  <p className="text-gray-400">{s.desc}</p>
+                  <h3 className="text-lg font-bold text-[#5C1A60] mb-1 font-sans">{s.title}</h3>
+                  <p className="text-sm text-purple-950/70 leading-relaxed font-sans">{s.desc}</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* Order Form */}
-      <section id="order-form" className="py-24 px-6 bg-gradient-to-b from-[#0F0718] to-[#1A0B2E]">
-        <div className="max-w-3xl mx-auto">
-          
-          {/* Form */}
-          <div className="p-8 glass-card rounded-3xl">
-            <h2 className="text-3xl font-bold mb-4 text-center">Get Your Divine Sketch</h2>
-            <div className="mb-8 flex justify-center items-center gap-2 text-xs text-gray-400 bg-white/5 py-2 px-4 rounded-xl border border-white/5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 fill-emerald-400/10" />
-              <span>100% Secure Checkout | SSL Encrypted & Verified Safe</span>
+          {/* Validation Indian Couple Card */}
+          <div className="astro-card p-4 overflow-hidden">
+            <div className="rounded-2xl overflow-hidden aspect-[4/3] relative mb-4">
+              <img 
+                src="/reviews/3.jpg" 
+                alt="Happy couple with soulmate sketch" 
+                className="w-full h-full object-cover object-center" 
+              />
             </div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">FULL NAME *</label>
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <input 
-                    required
-                    type="text" 
-                    placeholder="Enter your name"
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                    value={formData.name}
-                    onChange={e => setFormData({...formData, name: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">EMAIL ADDRESS *</label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <input 
-                    required
-                    type="email" 
-                    placeholder="Where should we send the sketch?"
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                    value={formData.email}
-                    onChange={e => setFormData({...formData, email: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">PHONE NUMBER *</label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <input 
-                      required
-                      type="tel" 
-                      placeholder="+91 Phone"
-                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                      value={formData.phone}
-                      onChange={e => setFormData({...formData, phone: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">GENDER *</label>
-                  <select 
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-4 px-4 focus:outline-none focus:border-orange-500 transition-colors appearance-none"
-                    value={formData.gender}
-                    onChange={e => setFormData({...formData, gender: e.target.value})}
-                  >
-                    <option value="female">Female</option>
-                    <option value="male">Male</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">DATE OF BIRTH (FOR ACCURACY)</label>
-                <div className="relative">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <input 
-                    required
-                    type="date"
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                    value={formData.dob}
-                    onChange={e => setFormData({...formData, dob: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">TIME OF BIRTH *</label>
-                <div className="relative">
-                  <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                  <input 
-                    required
-                    type="time"
-                    className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                    value={formData.tob}
-                    onChange={e => setFormData({...formData, tob: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">PLACE OF BIRTH (CITY) *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <input 
-                      required
-                      type="text" 
-                      placeholder="City or Town"
-                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                      value={formData.pobCity}
-                      onChange={e => setFormData({...formData, pobCity: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">STATE *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                    <input 
-                      required
-                      type="text" 
-                      placeholder="State"
-                      className="w-full bg-black/40 border border-white/10 rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-orange-500 transition-colors"
-                      value={formData.pobState}
-                      onChange={e => setFormData({...formData, pobState: e.target.value})}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Cyan Refund Guarantee */}
-              <div className="p-4 bg-cyan-950/45 border border-cyan-400/30 rounded-2xl flex items-center gap-3 text-cyan-300 text-sm font-semibold shadow-lg shadow-cyan-950/20 backdrop-blur-sm">
-                <span className="text-xl">🤝</span>
-                <span>If not satisfied by the sketch, get a full refund!</span>
-              </div>
-
-              <button 
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-5 bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl font-bold text-xl shadow-xl shadow-orange-600/30 hover:scale-[1.01] active:scale-95 transition-all text-white flex items-center justify-center gap-3"
-              >
-                {isSubmitting ? (
-                  <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Proceed to Get Sketch
-                    <ChevronRight className="w-6 h-6" />
-                  </>
-                )}
-              </button>
-            </form>
+            <div className="px-2 text-center">
+              <h4 className="text-base font-bold text-[#5C1A60] mb-1">Join 50,000+ Happy Hearts</h4>
+              <p className="text-xs text-purple-950/60 leading-relaxed">
+                Connect with the universal alignment that guides your spiritual connection.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Reviews */}
-      <section className="py-24 px-6 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">Customer Reviews</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Customer Reviews Section */}
+        <section className="mb-20">
+          <h2 className="text-3xl font-black text-center text-[#5C1A60] font-serif mb-8">
+            Customer Reviews
+          </h2>
+
+          <div className="space-y-4">
             {REVIEWS.map((review, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -5 }}
-                className="p-6 glass-card rounded-3xl flex flex-col justify-between"
-              >
+              <div key={i} className="astro-card p-6 flex flex-col justify-between">
                 <div>
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-orange-500 text-orange-500" />
+                  <div className="flex gap-1.5 mb-3 text-pink-500">
+                    {[...Array(review.rating)].map((_, idx) => (
+                      <Star key={idx} className="w-4 h-4 fill-pink-500 text-pink-500" />
                     ))}
                   </div>
-                  <p className="text-gray-300 italic mb-6 leading-relaxed">"{review.text}"</p>
+                  <p className="text-sm text-purple-950/80 leading-relaxed italic mb-4">
+                    "{review.text}"
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-600 flex items-center justify-center font-bold text-sm">
+                <div className="flex items-center gap-3 border-t border-purple-50/80 pt-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-white font-bold text-xs flex items-center justify-center">
                     {review.name[0]}
                   </div>
                   <div>
-                    <div className="font-bold text-sm">{review.name}</div>
-                    <div className="text-xs text-gray-500">{review.location}</div>
+                    <div className="font-bold text-xs text-[#5C1A60]">{review.name}</div>
+                    <div className="text-[10px] text-purple-600/60">{review.location}</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+
+        {/* The Form Section */}
+        <section id="order-form" className="astro-card bg-astro-form p-6 sm:p-8 border border-purple-200/40 relative">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#5C1A60] font-serif mb-3">
+              Your Soulmate Is Waiting To Be Revealed
+            </h2>
+            <div className="inline-flex items-center gap-1.5 text-[11px] text-purple-700/80 bg-purple-100/50 py-1 px-3.5 rounded-full border border-purple-200/30">
+              <ShieldCheck className="w-3.5 h-3.5 text-purple-600" />
+              <span>100% Confidential & Secure Order Details</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            
+            {/* Full Name */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Full Name (English Only)
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                <input 
+                  required
+                  type="text" 
+                  placeholder="Enter your name"
+                  className="w-full bg-white border border-purple-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all shadow-sm shadow-purple-950/[0.01]"
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* Date of Birth Dropdowns */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Date of Birth
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Day */}
+                <select 
+                  required
+                  className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
+                  value={dobDay}
+                  onChange={e => setDobDay(e.target.value)}
+                >
+                  <option value="">Day</option>
+                  {days.map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+
+                {/* Month */}
+                <select 
+                  required
+                  className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
+                  value={dobMonth}
+                  onChange={e => setDobMonth(e.target.value)}
+                >
+                  <option value="">Month</option>
+                  {months.map(m => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+
+                {/* Year */}
+                <select 
+                  required
+                  className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
+                  value={dobYear}
+                  onChange={e => setDobYear(e.target.value)}
+                >
+                  <option value="">Year</option>
+                  {years.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Time of Birth Dropdowns */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Time of Birth
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {/* Hour */}
+                <select 
+                  required
+                  className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
+                  value={tobHour}
+                  onChange={e => setTobHour(e.target.value)}
+                >
+                  <option value="">HH</option>
+                  {hours.map(h => (
+                    <option key={h} value={h}>{h}</option>
+                  ))}
+                </select>
+
+                {/* Minute */}
+                <select 
+                  required
+                  className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
+                  value={tobMinute}
+                  onChange={e => setTobMinute(e.target.value)}
+                >
+                  <option value="">MM</option>
+                  {minutes.map(m => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+
+                {/* AM/PM */}
+                <select 
+                  required
+                  className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
+                  value={tobAmPm}
+                  onChange={e => setTobAmPm(e.target.value)}
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Place of Birth City */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Place of Birth (City/Town)
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                <input 
+                  required
+                  type="text" 
+                  placeholder="Enter place of birth"
+                  className="w-full bg-white border border-purple-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all shadow-sm"
+                  value={formData.pobCity}
+                  onChange={e => setFormData({...formData, pobCity: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* State of Birth */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                State of Birth
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                <select 
+                  required
+                  className="w-full bg-white border border-purple-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all shadow-sm appearance-none text-purple-900"
+                  value={formData.pobState}
+                  onChange={e => setFormData({...formData, pobState: e.target.value})}
+                >
+                  <option value="">Select State</option>
+                  {INDIAN_STATES.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-purple-400 w-0 h-0" />
+              </div>
+            </div>
+
+            {/* Your Gender */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Your Gender
+              </label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                <select 
+                  required
+                  className="w-full bg-white border border-purple-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all shadow-sm appearance-none text-purple-900"
+                  value={formData.gender}
+                  onChange={e => setFormData({...formData, gender: e.target.value})}
+                >
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="other">Other</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-purple-400 w-0 h-0" />
+              </div>
+            </div>
+
+            {/* Email Address */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                <input 
+                  required
+                  type="email" 
+                  placeholder="Enter your email"
+                  className="w-full bg-white border border-purple-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all shadow-sm"
+                  value={formData.email}
+                  onChange={e => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* Mobile Number */}
+            <div>
+              <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
+                Mobile Number
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400" />
+                <input 
+                  required
+                  type="tel" 
+                  placeholder="10 digit mobile number"
+                  className="w-full bg-white border border-purple-100 rounded-2xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all shadow-sm"
+                  value={formData.phone}
+                  onChange={e => setFormData({...formData, phone: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* Refund Banner */}
+            <div className="p-4 bg-purple-100/40 border border-purple-200/20 rounded-2xl flex items-center gap-3 text-purple-800 text-xs font-semibold">
+              <span className="text-base flex-shrink-0">🤝</span>
+              <span>100% Risk-Free Guarantee: If not satisfied by the sketch, get a full refund!</span>
+            </div>
+
+            {/* Submit Button */}
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-4.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-bold text-lg shadow-lg shadow-pink-500/10 hover:scale-[1.01] active:scale-95 transition-all text-white flex items-center justify-center gap-3 cursor-pointer"
+            >
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Get My Soulmate Sketch
+                  <ChevronRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </form>
+        </section>
+
+      </main>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/5 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-orange-500 w-5 h-5" />
-            <span className="text-xl font-bold">BhagyaRekha</span>
-          </div>
-          <div className="flex gap-8 text-sm text-gray-500 flex-wrap justify-center">
-            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link to="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
-            <a href="mailto:Astrojyoti9599@gmail.com" className="hover:text-white transition-colors">Contact Us</a>
-          </div>
-          <div className="text-gray-500 text-sm">
-            © 2026 BhagyaRekha. Spiritual & Creative Services.
-          </div>
+      <footer className="py-12 border-t border-purple-200/30 px-6 max-w-4xl mx-auto text-center">
+        <div className="flex justify-center items-center gap-2 mb-6">
+          <Sparkles className="text-purple-600 w-5 h-5" />
+          <span className="text-lg font-bold text-purple-900">BhagyaRekha</span>
+        </div>
+        <div className="flex gap-6 text-xs text-purple-600/70 justify-center flex-wrap mb-6">
+          <Link to="/privacy" className="hover:text-purple-900 transition-colors">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-purple-900 transition-colors">Terms of Service</Link>
+          <Link to="/refund" className="hover:text-purple-900 transition-colors">Refund Policy</Link>
+          <a href="mailto:Astrojyoti9599@gmail.com" className="hover:text-purple-900 transition-colors">Contact Us</a>
+        </div>
+        <div className="text-purple-600/50 text-xs">
+          © 2026 BhagyaRekha. Spiritual & Creative Services.
         </div>
       </footer>
 
-      {/* Sticky Bottom Bar for Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-[#0F0718]/80 backdrop-blur-lg border-t border-white/10 z-[60]">
+      {/* Sticky Bottom Call-to-Action Bar for Mobile Screens */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4.5 bg-[#FAF2F0]/90 backdrop-blur-md border-t border-purple-200/20 z-[60] flex justify-center">
         <button 
           onClick={scrollToForm}
-          className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl font-bold text-lg shadow-lg shadow-orange-600/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+          className="w-full max-w-md py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl font-bold text-white text-base shadow-lg shadow-pink-500/10 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
-          <Heart className="w-5 h-5 fill-white" />
-          Get My Soulmate Sketch
+          💖 Get My Soulmate Sketch Now
         </button>
       </div>
     </div>
