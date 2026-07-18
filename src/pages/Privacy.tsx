@@ -76,7 +76,7 @@ export default function Privacy() {
               If you wish to request the deletion of your personal birth details after receiving your digital sketch, please write to us at:
             </p>
             <ul className="list-disc pl-6 mt-4 space-y-2 text-orange-400">
-              <li>Email: <a href="mailto:Astrojyoti9599@gmail.com" className="hover:underline">Astrojyoti9599@gmail.com</a></li>
+              <li>Email: <a href="mailto:bhagyarekhateam@gmail.com" className="hover:underline">bhagyarekhateam@gmail.com</a></li>
             </ul>
           </section>
         </div>

@@ -370,7 +370,7 @@ export default function Payment() {
 
           {/* Support Email */}
           <div className="text-[11px] text-purple-950/60 mt-5 border-t border-purple-50 pt-4">
-            For support, please email us at <a href="mailto:Astrojyoti9599@gmail.com" className="font-bold text-purple-700 hover:underline">Astrojyoti9599@gmail.com</a>
+            For support, please email us at <a href="mailto:bhagyarekhateam@gmail.com" className="font-bold text-purple-700 hover:underline">bhagyarekhateam@gmail.com</a>
           </div>
 
           {/* Custom Footer Links */}

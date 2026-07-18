@@ -72,7 +72,7 @@ export default function Terms() {
               If you have any questions or feedback regarding these terms, please contact us directly:
             </p>
             <ul className="list-disc pl-6 mt-4 space-y-2 text-orange-400">
-              <li>Email: <a href="mailto:Astrojyoti9599@gmail.com" className="hover:underline">Astrojyoti9599@gmail.com</a></li>
+              <li>Email: <a href="mailto:bhagyarekhateam@gmail.com" className="hover:underline">bhagyarekhateam@gmail.com</a></li>
             </ul>
           </section>
         </div>

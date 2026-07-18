@@ -68,7 +68,7 @@ export default function Refund() {
               For refund status, cancellation requests, or any delivery issues, write to us directly with your Order ID:
             </p>
             <ul className="list-disc pl-6 mt-4 space-y-2 text-orange-400">
-              <li>Email: <a href="mailto:Astrojyoti9599@gmail.com" className="hover:underline">Astrojyoti9599@gmail.com</a></li>
+              <li>Email: <a href="mailto:bhagyarekhateam@gmail.com" className="hover:underline">bhagyarekhateam@gmail.com</a></li>
             </ul>
           </section>
         </div>

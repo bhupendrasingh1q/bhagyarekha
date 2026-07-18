@@ -663,7 +663,7 @@ export default function Home() {
           <Link to="/privacy" className="hover:text-purple-900 transition-colors">Privacy Policy</Link>
           <Link to="/terms" className="hover:text-purple-900 transition-colors">Terms of Service</Link>
           <Link to="/refund" className="hover:text-purple-900 transition-colors">Refund Policy</Link>
-          <a href="mailto:Astrojyoti9599@gmail.com" className="hover:text-purple-900 transition-colors">Contact Us</a>
+          <a href="mailto:bhagyarekhateam@gmail.com" className="hover:text-purple-900 transition-colors">Contact Us</a>
         </div>
         <div className="text-purple-600/50 text-xs">
           © 2026 BhagyaRekha. Spiritual & Creative Services.
