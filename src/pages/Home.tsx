@@ -176,8 +176,8 @@ export default function Home() {
       alert("Please select a complete Date of Birth (Day, Month, Year).");
       return;
     }
-    if (!formData.tob) {
-      alert("Please select a complete Time of Birth (Hour, Minute, AM/PM).");
+    if ((tobHour || tobMinute) && !(tobHour && tobMinute)) {
+      alert("Please select a complete Time of Birth (Hour and Minute), or leave it empty.");
       return;
     }
 
@@ -491,12 +491,11 @@ export default function Home() {
             {/* Time of Birth Dropdowns */}
             <div>
               <label className="block text-xs font-bold text-purple-900/80 uppercase tracking-wider mb-2">
-                Time of Birth
+                Time of Birth (Optional)
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {/* Hour */}
                 <select 
-                  required
                   className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
                   value={tobHour}
                   onChange={e => setTobHour(e.target.value)}
@@ -509,7 +508,6 @@ export default function Home() {
 
                 {/* Minute */}
                 <select 
-                  required
                   className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
                   value={tobMinute}
                   onChange={e => setTobMinute(e.target.value)}
@@ -522,7 +520,6 @@ export default function Home() {
 
                 {/* AM/PM */}
                 <select 
-                  required
                   className="bg-white border border-purple-100 rounded-2xl py-3 px-3 text-sm text-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent shadow-sm"
                   value={tobAmPm}
                   onChange={e => setTobAmPm(e.target.value)}

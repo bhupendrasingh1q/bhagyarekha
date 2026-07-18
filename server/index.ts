@@ -74,13 +74,18 @@ app.use(express.json({ limit: '10kb' }));
 
 // Basic validation function
 function validateOrderData(data: any) {
-  const requiredFields = ['name', 'email', 'phone', 'gender', 'tob', 'pobCity', 'pobState'];
+  const requiredFields = ['name', 'email', 'phone', 'gender', 'pobCity', 'pobState'];
   const errors: string[] = [];
 
   for (const field of requiredFields) {
     if (!data[field] || typeof data[field] !== 'string' || data[field].trim() === '') {
       errors.push(`${field} is required and must be a string.`);
     }
+  }
+
+  // If tob is provided, ensure it is a string
+  if (data.tob !== undefined && data.tob !== null && typeof data.tob !== 'string') {
+    errors.push('tob must be a string.');
   }
 
   // Basic email format validation
@@ -110,7 +115,7 @@ app.post('/api/orders', async (req, res) => {
       phone: orderData.phone,
       gender: orderData.gender,
       dob: orderData.dob,
-      tob: orderData.tob,
+      tob: orderData.tob && typeof orderData.tob === 'string' && orderData.tob.trim() !== '' ? orderData.tob : null,
       pobCity: orderData.pobCity,
       pobState: orderData.pobState,
       status: 'pending'
